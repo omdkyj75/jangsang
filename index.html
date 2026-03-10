@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>장부 RPG</title>
+<style>
+body{
+  margin:0;
+  font-family:"Malgun Gothic","Noto Sans KR",sans-serif;
+  background:#f3efe6;
+  color:#222;
+}
+.wrap{
+  max-width:1280px;
+  margin:0 auto;
+  padding:16px;
+}
+.top{
+  display:grid;
+  grid-template-columns: 1.25fr 420px;
+  gap:16px;
+}
+.panel{
+  background:#fffdf8;
+  border:2px solid #d7c9a5;
+  border-radius:14px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.08);
+}
+.game-area{
+  padding:14px;
+}
+h1,h2,h3,p{
+  margin:0;
+}
+#gameTitle{
+  font-size:30px;
+  margin-bottom:8px;
+  color:#5a2f12;
+}
+.subtitle{
+  margin-bottom:10px;
+  color:#6b5a40;
+}
+.status{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:8px;
+  margin-bottom:12px;
+}
+.card{
+  background:#fff8ea;
+  border:1px solid #e4d5b2;
+  border-radius:10px;
+  padding:10px;
+  min-height:54px;
+}
+.label{
+  font-size:12px;
+  color:#7c6a4e;
+}
+.value{
+  font-size:18px;
+  margin-top:2px;
+}
+#board{
+  display:grid;
+  grid-template-columns:repeat(15,46px);
+  grid-template-rows:repeat(10,46px);
+  gap:3px;
+  justify-content:center;
+  margin:10px auto 6px auto;
+  background:#bfa774;
+  padding:10px;
+  border-radius:14px;
+  width:max-content;
+}
+.cell{
+  width:46px;
+  height:46px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  border-radius:8px;
+  user-select:none;
+  position:relative;
+  font-weight:700;
+}
+.floor{ background:#efe5c8; }
+.wall{ background:#5f513f; }
+.player{
+  background:#67b7ff;
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,0.55);
+}
+.npc{
+  background:#d9efb8;
+}
+.start{
+  background:#d5f1ff;
+  box-shadow:inset 0 0 0 2px #7ecdf0;
+}
+.start-visited{
+  background:#b8e0ff;
+  box-shadow:inset 0 0 0 2px #5aa3c8;
+}
+.goal{
+  background:#ffe18f;
+  box-shadow:inset 0 0 0 2px #d1a93b;
+}
+.quiz{
+  background:#dff4ff;
+  box-shadow:inset 0 0 0 2px #91c8ec;
+}
+.heal{
+  background:#ffd8e4;
+  box-shadow:inset 0 0 0 2px #e59ab3;
+}
+.boss{
+  background:#ffb7a9;
+  box-shadow:inset 0 0 0 2px #d45b47;
+}
+.boss-open{
+  background:#ffcccc;
+  box-shadow:inset 0 0 0 2px #c27070;
+}
+.door-heart{
+  background:#ffd6d6;
+  box-shadow:inset 0 0 0 2px #d85a5a;
+}
+.door-heart-open{
+  background:#ffe6e6;
+  box-shadow:inset 0 0 0 2px #b85a5a;
+}
+.door-lung{
+  background:#d8efff;
+  box-shadow:inset 0 0 0 2px #5fa8d3;
+}
+.door-lung-open{
+  background:#e8f5ff;
+  box-shadow:inset 0 0 0 2px #4a8fb5;
+}
+.door-spleen{
+  background:#ffe9b8;
+  box-shadow:inset 0 0 0 2px #c79735;
+}
+.door-spleen-open{
+  background:#fff5d8;
+  box-shadow:inset 0 0 0 2px #b5860d;
+}
+.door-liver{
+  background:#d9f0d2;
+  box-shadow:inset 0 0 0 2px #5fa15f;
+}
+.door-liver-open{
+  background:#e8f7e1;
+  box-shadow:inset 0 0 0 2px #4a8a4a;
+}
+.door-kidney{
+  background:#e0d8ff;
+  box-shadow:inset 0 0 0 2px #7060c8;
+}
+.door-kidney-open{
+  background:#ede8ff;
+  box-shadow:inset 0 0 0 2px #6050b0;
+}
+.legend{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:10px;
+}
+.legend span{
+  background:#fff8ea;
+  border:1px solid #e4d5b2;
+  border-radius:10px;
+  padding:6px 8px;
+  font-size:13px;
+}
+.side{
+  padding:14px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.box{
+  background:#fff8ea;
+  border:1px solid #e4d5b2;
+  border-radius:12px;
+  padding:12px;
+}
+#message{
+  min-height:140px;
+  line-height:1.6;
+  white-space:pre-line;
+  font-size:14px;
+}
+.controls{
+  line-height:1.7;
+}
+button{
+  padding:10px 14px;
+  border:none;
+  border-radius:10px;
+  background:#8b5a2b;
+  color:white;
+  cursor:pointer;
+  font-size:14px;
+  transition:all 0.15s ease;
+}
+button:hover:not(:disabled){
+  opacity:0.92;
+  transform:translateY(-1px);
+}
+button:disabled{
+  opacity:0.5;
+  cursor:not-allowed;
+}
+button:active:not(:disabled){
+  transform:translateY(1px);
+}
+.progress-list{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+.badge{
+  padding:8px 10px;
+  border-radius:10px;
+  background:#efe5c8;
+  border:1px solid #d8c8a2;
+  font-size:13px;
+}
+.done{
+  background:#d8f0c8;
+  border-color:#a6cf8b;
+}
+.mobile-pad{
+  display:grid;
+  grid-template-columns:repeat(3,64px);
+  gap:8px;
+  justify-content:center;
+  margin-top:10px;
+}
+.pad-empty{
+  visibility:hidden;
+}
+.pad-btn{
+  width:64px;
+  height:52px;
+  font-size:22px;
+  padding:0;
+  font-weight:bold;
+}
+.pad-btn:active:not(:disabled){
+  background:#6d4421;
+  transform:scale(0.95);
+}
+.modal-bg{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.45);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:20;
+}
+.modal{
+  width:min(760px,92vw);
+  background:#fffdf8;
+  border-radius:16px;
+  padding:20px;
+  border:2px solid #d7c9a5;
+  box-shadow:0 10px 30px rgba(0,0,0,0.22);
+  max-height:80vh;
+  overflow-y:auto;
+}
+.modal h3{
+  margin-bottom:10px;
+  color:#5a2f12;
+  font-size:18px;
+}
+.modal h4{
+  margin:10px 0 6px 0;
+  color:#6b5a40;
+  font-size:14px;
+  font-weight:600;
+}
+#quizText{
+  line-height:1.7;
+  margin-bottom:12px;
+  font-size:18px;
+}
+.answer-explanation{
+  background:#f0f8e8;
+  border-left:4px solid #5fa15f;
+  padding:10px;
+  margin:10px 0;
+  border-radius:6px;
+  font-size:14px;
+  line-height:1.6;
+}
+.answer-explanation.wrong{
+  background:#fff0f0;
+  border-left-color:#d85a5a;
+}
+.answers{
+  display:grid;
+  gap:8px;
+  margin-bottom:12px;
+}
+.answerBtn{
+  text-align:left;
+  padding:12px;
+  background:#fff8ea;
+  color:#222;
+  border:1px solid #d8c8a2;
+  border-radius:10px;
+}
+.answerBtn:hover:not(:disabled){
+  background:#f5ecd8;
+}
+.answerBtn:disabled{
+  background:#f0f0f0;
+  color:#999;
+}
+.footerRow{
+  margin-top:12px;
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.small{
+  font-size:13px;
+  color:#76664d;
+}
+.tile-label{
+  position:absolute;
+  bottom:2px;
+  right:4px;
+  font-size:9px;
+  opacity:0.9;
+}
+@media (max-width:1150px){
+  .top{
+    grid-template-columns:1fr;
+  }
+}
+@media (max-width:760px){
+  #board{
+    grid-template-columns:repeat(15,36px);
+    grid-template-rows:repeat(10,36px);
+  }
+  .cell{
+    width:36px;
+    height:36px;
+    font-size:17px;
+  }
+}
+.music-control{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  background:#f5ede0;
+  padding:10px;
+  border-radius:10px;
+  margin-bottom:12px;
+}
+.music-btn{
+  width:36px;
+  height:36px;
+  padding:0;
+  font-size:16px;
+  flex-shrink:0;
+}
+.volume-slider{
+  flex:1;
+  height:6px;
+  cursor:pointer;
+  accent-color:#8b5a2b;
+}
+.music-label{
+  font-size:12px;
+  color:#6b5a40;
+  white-space:nowrap;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="panel game-area">
+      <h1 id="gameTitle">장부 RPG</h1>
+      <p class="subtitle">문을 열고 출구로 가세요</p>
+
+      <div class="status">
+        <div class="card"><div class="label">체력</div><div class="value" id="hpText">5</div></div>
+        <div class="card"><div class="label">점수</div><div class="value" id="scoreText">0</div></div>
+        <div class="card"><div class="label">정답 수</div><div class="value" id="correctText">0</div></div>
+        <div class="card"><div class="label">출제 수</div><div class="value" id="askedText">0</div></div>
+        <div class="card"><div class="label">남은 문제</div><div class="value" id="remainText">100</div></div>
+        <div class="card"><div class="label">현재 지역</div><div class="value" id="areaText">시작 마당</div></div>
+      </div>
+
+      <div id="board"></div>
+
+      <div class="legend">
+        <span>🏕 시작</span>
+        <span>🌿 현자</span>
+        <span>❓ 탐험 문제</span>
+        <span>💗 회복</span>
+        <span>❤️ 심문</span>
+        <span>💨 폐문</span>
+        <span>🌾 비문</span>
+        <span>🌳 간문</span>
+        <span>💧 신문</span>
+        <span>👹 육부 성문</span>
+        <span>🏆 출구</span>
+      </div>
+
+      <div class="mobile-pad">
+        <div class="pad-empty"></div>
+        <button class="pad-btn" id="btnUp">↑</button>
+        <div class="pad-empty"></div>
+        <button class="pad-btn" id="btnLeft">←</button>
+        <button class="pad-btn" id="btnDown">↓</button>
+        <button class="pad-btn" id="btnRight">→</button>
+      </div>
+    </div>
+
+    <div class="panel side">
+      <div class="box">
+        <h3>안내</h3>
+        <p class="controls">
+          이동: 방향키 또는 WASD<br>
+          모바일: 아래 버튼 사용
+        </p>
+        <p class="small" style="margin-top:8px;">
+          목표: 오장 문 5개와 육부 성문을 지나 출구에 도달하세요.
+        </p>
+      </div>
+
+      <div class="box">
+        <div class="music-control">
+          <button class="music-btn" id="musicToggleBtn" title="음악 재생/일시정지">🔊</button>
+          <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="50" title="볼륨">
+          <span class="music-label">배경음악</span>
+        </div>
+        <p class="small" style="margin:0; color:#999;">
+          음악이 안 나오면 브라우저 음소거 설정을 확인하세요.
+        </p>
+      </div>
+
+      <div class="box">
+        <h3>진행 현황</h3>
+        <div class="progress-list">
+          <div class="badge" id="badgeHeart">❤️ 심</div>
+          <div class="badge" id="badgeLung">💨 폐</div>
+          <div class="badge" id="badgeSpleen">🌾 비</div>
+          <div class="badge" id="badgeLiver">🌳 간</div>
+          <div class="badge" id="badgeKidney">💧 신</div>
+          <div class="badge" id="badgeBoss">👹 육부</div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3>메시지</h3>
+        <div id="message">시작점에서 출발해 오장 문을 열고 육부 성문을 지나 출구로 가세요.</div>
+      </div>
+
+      <button id="restartBtn">🔄 다시 시작</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="quizModalBg">
+  <div class="modal">
+    <h3 id="quizTitle">문제</h3>
+    <p id="quizMeta" class="small"></p>
+    <div id="quizText"></div>
+    <div id="answersBox" class="answers"></div>
+    <div id="explanationBox"></div>
+    <div class="footerRow">
+      <button id="continueBtn" style="display:none;">계속</button>
+    </div>
+  </div>
+</div>
+
+<audio id="backgroundMusic" loop>
+  <source src="https://www.bensound.com/bensound-music/bensound-meditate.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+// ========== 타일 정의 ==========
+const TILE = {
+  FLOOR: 0,
+  WALL: 1,
+  START: 2,
+  NPC: 3,
+  GOAL: 4,
+  QUIZ: 5,
+  HEAL: 6,
+  BOSS: 7,
+  DOOR_HEART: 8,
+  DOOR_LUNG: 9,
+  DOOR_SPLEEN: 10,
+  DOOR_LIVER: 11,
+  DOOR_KIDNEY: 12,
+  OPENED_DOOR_HEART: 13,
+  OPENED_DOOR_LUNG: 14,
+  OPENED_DOOR_SPLEEN: 15,
+  OPENED_DOOR_LIVER: 16,
+  OPENED_DOOR_KIDNEY: 17,
+  OPENED_BOSS: 18
+};
+
+// ========== 맵 데이터 (10행으로 최적화) ==========
+const originalMap = [
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+  [1,2,0,0,0,0,0,0,0,0,0,0,0,3,1],
+  [1,0,8,0,9,0,10,0,11,0,12,0,0,0,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,5,0,1],
+  [1,5,0,5,0,5,0,7,0,5,0,5,0,6,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,5,0,5,0,6,0,5,0,5,0,6,0,5,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,0,5,0,5,0,5,0,4,0,5,0,5,0,1],
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+];
+
+// ========== 문제 데이터 (카테고리별 분류) ==========
+const questionsData = {
+  "장상총론": [
+    {q: "장상학설에서 중점을 두는 것은?", a: "생리기능과 병리변화", choices: ["생리기능과 병리변화", "개별 장기만", "물리적 구조"], cat: "장상총론", id: "JS1"},
+    {q: "오장의 핵심 개념은?", a: "상호 조화", choices: ["상호 조화", "독립적 작용", "위계적 관계"], cat: "장상총론", id: "JS2"},
+    {q: "육부의 역할은?", a: "전화와 배설", choices: ["전화와 배설", "저장", "통제"], cat: "장상총론", id: "JS3"}
+  ],
+  "심": [
+    {q: "심주(主)의 기능은?", a: "신명과 혈맥", choices: ["신명과 혈맥", "호흡만", "소화"], cat: "심", id: "H1"},
+    {q: "심의 열리는 부위는?", a: "혀", choices: ["혀", "눈", "귀"], cat: "심", id: "H2"},
+    {q: "심과 관련된 감정은?", a: "기쁨", choices: ["기쁨", "분노", "슬픔"], cat: "심", id: "H3"}
+  ],
+  "폐": [
+    {q: "폐주(主)의 기능은?", a: "기와 호흡", choices: ["기와 호흡", "혈액", "진액"], cat: "폐", id: "P1"},
+    {q: "폐의 열리는 부위는?", a: "코", choices: ["코", "입", "혀"], cat: "폐", id: "P2"},
+    {q: "폐와 관련된 감정은?", a: "슬픔", choices: ["슬픔", "기쁨", "두려움"], cat: "폐", id: "P3"}
+  ],
+  "비": [
+    {q: "비주(主)의 기능은?", a: "운화와 통혈", choices: ["운화와 통혈", "호흡", "배설"], cat: "비", id: "SP1"},
+    {q: "비의 열리는 부위는?", a: "입", choices: ["입", "눈", "귀"], cat: "비", id: "SP2"},
+    {q: "비와 관련된 감정은?", a: "생각", choices: ["생각", "기쁨", "분노"], cat: "비", id: "SP3"}
+  ],
+  "간": [
+    {q: "간주(主)의 기능은?", a: "소설", choices: ["소설", "저장", "운화"], cat: "간", id: "Li1"},
+    {q: "간의 열리는 부위는?", a: "눈", choices: ["눈", "코", "입"], cat: "간", id: "Li2"},
+    {q: "간과 관련된 감정은?", a: "분노", choices: ["분노", "기쁨", "두려움"], cat: "간", id: "Li3"}
+  ],
+  "신": [
+    {q: "신주(主)의 기능은?", a: "저장과 생장발육", choices: ["저장과 생장발육", "호흡", "소화"], cat: "신", id: "K1"},
+    {q: "신의 열리는 부위는?", a: "귀", choices: ["귀", "코", "입"], cat: "신", id: "K2"},
+    {q: "신과 관련된 감정은?", a: "두려움", choices: ["두려움", "기쁨", "분노"], cat: "신", id: "K3"}
+  ],
+  "육부": [
+    {q: "육부의 주된 기능은?", a: "전화와 배설", choices: ["전화와 배설", "저장", "조절"], cat: "육부", id: "V1"},
+    {q: "담(膽)의 역할은?", a: "저장과 배설", choices: ["저장과 배설", "소화", "영양"], cat: "육부", id: "V2"},
+    {q: "소장의 기능은?", a: "분별청탁", choices: ["분별청탁", "저장", "통제"], cat: "육부", id: "V3"}
+  ],
+  "기항지부": [
+    {q: "기해혈은 어디인가?", a: "하단전", choices: ["하단전", "상단전", "중단전"], cat: "기항지부", id: "C1"},
+    {q: "임맥은 어디를 지나는가?", a: "정중선 앞", choices: ["정중선 앞", "척주 뒤", "옆구리"], cat: "기항지부", id: "C2"},
+    {q: "십이경맥의 특징은?", a: "양면 대칭", choices: ["양면 대칭", "일직선", "원형"], cat: "기항지부", id: "C3"}
+  ],
+  "관계": [
+    {q: "심과 신의 관계는?", a: "수화상제", choices: ["수화상제", "목토관계", "금수관계"], cat: "관계", id: "R1"},
+    {q: "간과 비의 관계는?", a: "목토관계", choices: ["목토관계", "수화관계", "금목관계"], cat: "관계", id: "R2"},
+    {q: "폐와 신의 관계는?", a: "금수관계", choices: ["금수관계", "목화관계", "토목관계"], cat: "관계", id: "R3"}
+  ],
+  "종합": [
+    {q: "오장의 정기가 모두 모이는 곳은?", a: "심", choices: ["심", "간", "신"], cat: "종합", id: "ZH1"},
+    {q: "기의 순환 경로는?", a: "12경맥", choices: ["12경맥", "8맥", "독맥"], cat: "종합", id: "ZH2"},
+    {q: "항상성 유지의 핵심은?", a: "음양평형", choices: ["음양평형", "좌우대칭", "상하균형"], cat: "종합", id: "ZH3"}
+  ]
+};
+
+// ========== 게임 상태 ==========
+let boardData = JSON.parse(JSON.stringify(originalMap));
+let player = {x: 1, y: 1};
+let hp = 5;
+let score = 0;
+let correctCount = 0;
+let askedCount = 0;
+let currentArea = "시작 마당";
+let quizLock = false;
+let gameOver = false;
+
+const organProgress = {
+  heart: false,
+  lung: false,
+  spleen: false,
+  liver: false,
+  kidney: false,
+  boss: false
+};
+
+const areaNames = {
+  heart: "심의 경계",
+  lung: "폐의 경계",
+  spleen: "비의 경계",
+  liver: "간의 경계",
+  kidney: "신의 경계"
+};
+
+function shuffleArray(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+let questionBag = [];
+
+function resetQuestionBag(){
+  questionBag = [];
+  for(const cat in questionsData){
+    questionsData[cat].forEach(q=>{
+      questionBag.push({...q});
+    });
+  }
+  shuffleArray(questionBag);
+}
+
+function pickQuestionByCategory(categories){
+  const available = questionBag.filter(q=>categories.includes(q.cat));
+  if(available.length===0){
+    console.warn("문제 부족: "+categories);
+    resetQuestionBag();
+    return pickQuestionByCategory(categories);
+  }
+  const idx = Math.floor(Math.random()*available.length);
+  const q = available[idx];
+  questionBag = questionBag.filter(item=>item!==q);
+  return q;
+}
+
+// ========== DOM 요소 ==========
+const board = document.getElementById("board");
+const message = document.getElementById("message");
+const restartBtn = document.getElementById("restartBtn");
+const quizModalBg = document.getElementById("quizModalBg");
+const quizTitle = document.getElementById("quizTitle");
+const quizText = document.getElementById("quizText");
+const quizMeta = document.getElementById("quizMeta");
+const answersBox = document.getElementById("answersBox");
+const explanationBox = document.getElementById("explanationBox");
+const continueBtn = document.getElementById("continueBtn");
+
+// 음악 제어 요소
+const backgroundMusic = document.getElementById("backgroundMusic");
+const musicToggleBtn = document.getElementById("musicToggleBtn");
+const volumeSlider = document.getElementById("volumeSlider");
+
+let musicPlaying = true;
+
+function updateMusicButton(){
+  musicToggleBtn.textContent = musicPlaying ? "🔊" : "🔇";
+}
+
+// ========== UI 업데이트 ==========
+function updateStatus(){
+  document.getElementById("hpText").textContent = hp;
+  document.getElementById("scoreText").textContent = score;
+  document.getElementById("correctText").textContent = correctCount;
+  document.getElementById("askedText").textContent = askedCount;
+  document.getElementById("remainText").textContent = questionBag.length;
+  document.getElementById("areaText").textContent = currentArea;
+
+  document.getElementById("badgeHeart").className = organProgress.heart ? "badge done" : "badge";
+  document.getElementById("badgeLung").className = organProgress.lung ? "badge done" : "badge";
+  document.getElementById("badgeSpleen").className = organProgress.spleen ? "badge done" : "badge";
+  document.getElementById("badgeLiver").className = organProgress.liver ? "badge done" : "badge";
+  document.getElementById("badgeKidney").className = organProgress.kidney ? "badge done" : "badge";
+  document.getElementById("badgeBoss").className = organProgress.boss ? "badge done" : "badge";
+}
+
+// ========== 음악 제어 ==========
+function toggleMusic(){
+  musicPlaying = !musicPlaying;
+  updateMusicButton();
+
+  if(musicPlaying){
+    backgroundMusic.play().catch(err=>{
+      console.log("음악 재생 실패:", err);
+      musicPlaying = false;
+      updateMusicButton();
+    });
+  }else{
+    backgroundMusic.pause();
+  }
+}
+
+function setVolume(value){
+  backgroundMusic.volume = value / 100;
+}
+
+function startBackgroundMusic(resetPosition=true){
+  backgroundMusic.volume = volumeSlider.value / 100;
+  updateMusicButton();
+
+  if(!musicPlaying){
+    backgroundMusic.pause();
+    return;
+  }
+
+  if(resetPosition){
+    backgroundMusic.currentTime = 0;
+  }
+
+  backgroundMusic.play().catch(err=>{
+    console.log("배경음악 자동 재생 제한. 사용자 상호작용 필요:", err);
+    musicPlaying = false;
+    updateMusicButton();
+  });
+}
+
+musicToggleBtn.addEventListener("click", toggleMusic);
+volumeSlider.addEventListener("input", (e)=>{
+  setVolume(e.target.value);
+});
+
+function getTileClass(tile){
+  if(tile===TILE.WALL) return "wall";
+  if(tile===TILE.FLOOR) return "floor";
+  if(tile===TILE.NPC) return "npc";
+  if(tile===TILE.START) return "start";
+  if(tile===TILE.GOAL) return "goal";
+  if(tile===TILE.QUIZ) return "quiz";
+  if(tile===TILE.HEAL) return "heal";
+  if(tile===TILE.BOSS) return "boss";
+  if(tile===TILE.OPENED_BOSS) return "boss-open";
+  if(tile===TILE.DOOR_HEART) return "door-heart";
+  if(tile===TILE.OPENED_DOOR_HEART) return "door-heart-open";
+  if(tile===TILE.DOOR_LUNG) return "door-lung";
+  if(tile===TILE.OPENED_DOOR_LUNG) return "door-lung-open";
+  if(tile===TILE.DOOR_SPLEEN) return "door-spleen";
+  if(tile===TILE.OPENED_DOOR_SPLEEN) return "door-spleen-open";
+  if(tile===TILE.DOOR_LIVER) return "door-liver";
+  if(tile===TILE.OPENED_DOOR_LIVER) return "door-liver-open";
+  if(tile===TILE.DOOR_KIDNEY) return "door-kidney";
+  if(tile===TILE.OPENED_DOOR_KIDNEY) return "door-kidney-open";
+  return "floor";
+}
+
+function getTileIcon(tile){
+  if(tile===TILE.NPC) return "🌿";
+  if(tile===TILE.START) return "🏕";
+  if(tile===TILE.GOAL) return "🏆";
+  if(tile===TILE.QUIZ) return "❓";
+  if(tile===TILE.HEAL) return "💗";
+  if(tile===TILE.BOSS) return "👹";
+  if(tile===TILE.OPENED_BOSS) return "👹";
+  if(tile===TILE.DOOR_HEART || tile===TILE.OPENED_DOOR_HEART) return "❤️";
+  if(tile===TILE.DOOR_LUNG || tile===TILE.OPENED_DOOR_LUNG) return "💨";
+  if(tile===TILE.DOOR_SPLEEN || tile===TILE.OPENED_DOOR_SPLEEN) return "🌾";
+  if(tile===TILE.DOOR_LIVER || tile===TILE.OPENED_DOOR_LIVER) return "🌳";
+  if(tile===TILE.DOOR_KIDNEY || tile===TILE.OPENED_DOOR_KIDNEY) return "💧";
+  return "";
+}
+
+function getTileLabel(tile){
+  if(tile===TILE.DOOR_HEART || tile===TILE.OPENED_DOOR_HEART) return "心";
+  if(tile===TILE.DOOR_LUNG || tile===TILE.OPENED_DOOR_LUNG) return "肺";
+  if(tile===TILE.DOOR_SPLEEN || tile===TILE.OPENED_DOOR_SPLEEN) return "脾";
+  if(tile===TILE.DOOR_LIVER || tile===TILE.OPENED_DOOR_LIVER) return "肝";
+  if(tile===TILE.DOOR_KIDNEY || tile===TILE.OPENED_DOOR_KIDNEY) return "腎";
+  if(tile===TILE.BOSS || tile===TILE.OPENED_BOSS) return "城";
+  if(tile===TILE.START) return "始";
+  if(tile===TILE.GOAL) return "門";
+  return "";
+}
+
+function drawBoard(){
+  board.innerHTML = "";
+  for(let y=0;y<boardData.length;y++){
+    for(let x=0;x<boardData[y].length;x++){
+      const tile = boardData[y][x];
+      const div = document.createElement("div");
+      div.className = "cell " + getTileClass(tile);
+      div.textContent = getTileIcon(tile);
+
+      const label = getTileLabel(tile);
+      if(label){
+        const s = document.createElement("div");
+        s.className = "tile-label";
+        s.textContent = label;
+        div.appendChild(s);
+      }
+
+      if(player.x===x && player.y===y){
+        div.className = "cell player";
+        div.textContent = "🧑";
+      }
+
+      board.appendChild(div);
+    }
+  }
+}
+
+function setMessage(text){
+  message.textContent = text;
+}
+
+
+// ========== 핵심 로직: 문제 출제 및 답변 ==========
+function askQuiz(question, titleText, onCorrect, onWrong){
+  if(gameOver) return;
+  quizLock = true;
+
+  quizModalBg.style.display = "flex";
+  quizTitle.textContent = titleText;
+  quizText.textContent = question.q;
+  quizMeta.textContent = "분류: " + question.cat + " / 문제 ID: " + question.id;
+  answersBox.innerHTML = "";
+  explanationBox.innerHTML = "";
+  continueBtn.style.display = "none";
+
+  const shuffled = shuffleArray([...question.choices]);
+  let answered = false;
+
+  shuffled.forEach(choice=>{
+    const btn = document.createElement("button");
+    btn.className = "answerBtn";
+    btn.textContent = choice;
+    btn.onclick = ()=>{
+      if(answered || gameOver) return;
+      answered = true;
+
+      document.querySelectorAll(".answerBtn").forEach(b=>b.disabled = true);
+
+      askedCount++;
+
+      if(choice === question.a){
+        correctCount++;
+        score += 10;
+        updateStatus();
+
+        const exp = document.createElement("div");
+        exp.className = "answer-explanation";
+        exp.innerHTML = "<h4>✓ 정답입니다!</h4><p>" + choice + "이(가) 맞습니다.</p>";
+        explanationBox.innerHTML = "";
+        explanationBox.appendChild(exp);
+
+        continueBtn.style.display = "block";
+        continueBtn.onclick = ()=>{
+          quizModalBg.style.display = "none";
+          quizLock = false;
+          onCorrect();
+          drawBoard();
+        };
+      }else{
+        hp--;
+        updateStatus();
+
+        const exp = document.createElement("div");
+        exp.className = "answer-explanation wrong";
+        exp.innerHTML = "<h4>✗ 오답입니다</h4><p>당신의 답: " + choice + "</p><p>정답: " + question.a + "</p>";
+        explanationBox.innerHTML = "";
+        explanationBox.appendChild(exp);
+
+        if(hp <= 0){
+          setMessage("체력이 모두 소진되었습니다.\n장부의 질서를 회복하지 못하고 수련관에서 물러났습니다.");
+          drawBoard();
+
+          continueBtn.style.display = "block";
+          continueBtn.textContent = "처음부터 다시";
+          continueBtn.onclick = ()=>{
+            quizModalBg.style.display = "none";
+            restartGame();
+          };
+          return;
+        }
+
+        continueBtn.style.display = "block";
+        continueBtn.textContent = "계속";
+        continueBtn.onclick = ()=>{
+          quizModalBg.style.display = "none";
+          quizLock = false;
+          onWrong(question.a);
+          drawBoard();
+        };
+      }
+    };
+    answersBox.appendChild(btn);
+  });
+}
+
+function openDoor(type, x, y){
+  const doorTileMap = {
+    heart: TILE.OPENED_DOOR_HEART,
+    lung: TILE.OPENED_DOOR_LUNG,
+    spleen: TILE.OPENED_DOOR_SPLEEN,
+    liver: TILE.OPENED_DOOR_LIVER,
+    kidney: TILE.OPENED_DOOR_KIDNEY
+  };
+
+  boardData[y][x] = doorTileMap[type];
+  organProgress[type] = true;
+  currentArea = areaNames[type];
+  player.x = x;
+  player.y = y;
+  score += 20;
+  setMessage(areaNames[type] + "을 열었습니다.\n장부의 질서를 한 단계 회복했습니다.");
+  updateStatus();
+  drawBoard();
+}
+
+function moveToTile(x, y, areaName="탐험 중"){
+  player.x = x;
+  player.y = y;
+  currentArea = areaName;
+  updateStatus();
+  drawBoard();
+}
+
+function stayOnCurrentTile(areaName=currentArea){
+  currentArea = areaName;
+  updateStatus();
+  drawBoard();
+}
+
+function tryEnterTile(nx, ny){
+  if(gameOver || quizLock) return;
+  if(ny<0 || ny>=boardData.length || nx<0 || nx>=boardData[0].length) return;
+
+  const tile = boardData[ny][nx];
+  if(tile===TILE.WALL) return;
+
+  if(tile===TILE.FLOOR){
+    moveToTile(nx, ny, "탐험 중");
+    return;
+  }
+
+  if(tile===TILE.START){
+    moveToTile(nx, ny, "시작 마당");
+    setMessage("탐험의 시작점입니다.\n오장의 문을 열고 육부 성문을 지나 최종 출구에 도달하십시오.");
+    return;
+  }
+
+  if(tile===TILE.NPC){
+    moveToTile(nx, ny, "현자의 터");
+    setMessage("현자: 장상학설은 장부의 생리기능, 병리변화, 관규, 형체, 정지, 장부 상호관계를 함께 보는 학설입니다.\n오장의 문을 열고 육부의 성문을 통과하십시오.");
+    return;
+  }
+
+  if(tile===TILE.HEAL){
+    moveToTile(nx, ny, "회복 지점");
+    hp = Math.min(hp+1, 5);
+    boardData[ny][nx] = TILE.FLOOR;
+    setMessage("회복의 약초를 얻었습니다.\n체력이 1 회복되었습니다.");
+    updateStatus();
+    drawBoard();
+    return;
+  }
+
+  if(tile===TILE.QUIZ){
+    const q = pickQuestionByCategory(["장상총론","심","폐","비","간","신","육부","기항지부","관계","종합"]);
+    askQuiz(
+      q,
+      "탐험 문제",
+      ()=>{
+        boardData[ny][nx] = TILE.FLOOR;
+        moveToTile(nx, ny, "탐험 문제 통과");
+        score += 5;
+        setMessage("정답입니다!\n지식의 벽을 넘어 앞으로 나아갑니다.");
+      },
+      (ans)=>{
+        stayOnCurrentTile("문제 재도전");
+        setMessage("오답입니다.\n정답은 " + ans + " 입니다.\n원래 자리에서 다시 생각해 보십시오.\n체력이 1 감소했습니다.");
+      }
+    );
+    return;
+  }
+
+  if(tile===TILE.DOOR_HEART){
+    const q = pickQuestionByCategory(["심"]);
+    askQuiz(
+      q,
+      "심의 문 ❤️",
+      ()=>openDoor("heart", nx, ny),
+      (ans)=>{
+        stayOnCurrentTile("심의 문 앞");
+        setMessage("심의 문이 닫혀 있습니다.\n정답은 " + ans + " 입니다.\n체력이 1 감소했습니다.");
+      }
+    );
+    return;
+  }
+
+  if(tile===TILE.DOOR_LUNG){
+    const q = pickQuestionByCategory(["폐"]);
+    askQuiz(
+      q,
+      "폐의 문 💨",
+      ()=>openDoor("lung", nx, ny),
+      (ans)=>{
+        stayOnCurrentTile("폐의 문 앞");
+        setMessage("폐의 문이 닫혀 있습니다.\n정답은 " + ans + " 입니다.\n체력이 1 감소했습니다.");
+      }
+    );
+    return;
+  }
+
+  if(tile===TILE.DOOR_SPLEEN){
+    const q = pickQuestionByCategory(["비"]);
+    askQuiz(
+      q,
+      "비의 문 🌾",
+      ()=>openDoor("spleen", nx, ny),
+      (ans)=>{
+        stayOnCurrentTile("비의 문 앞");
+        setMessage("비의 문이 닫혀 있습니다.\n정답은 " + ans + " 입니다.\n체력이 1 감소했습니다.");
+      }
+    );
+    return;
+  }
+
+  if(tile===TILE.DOOR_LIVER){
+    const q = pickQuestionByCategory(["간"]);
+    askQuiz(
+      q,
+      "간의 문 🌳",
+      ()=>openDoor("liver", nx, ny),
+      (ans)=>{
+        stayOnCurrentTile("간의 문 앞");
+        setMessage("간의 문이 닫혀 있습니다.\n정답은 " + ans + " 입니다.\n체력이 1 감소했습니다.");
+      }
+    );
+    return;
+  }
+
+  if(tile===TILE.DOOR_KIDNEY){
+    const q = pickQuestionByCategory(["신"]);
+    askQuiz(
+      q,
+      "신의 문 💧",
+      ()=>openDoor("kidney", nx, ny),
+      (ans)=>{
+        stayOnCurrentTile("신의 문 앞");
+        setMessage("신의 문이 닫혀 있습니다.\n정답은 " + ans + " 입니다.\n체력이 1 감소했습니다.");
+      }
+    );
+    return;
+  }
+
+  if(tile===TILE.OPENED_DOOR_HEART || tile===TILE.OPENED_DOOR_LUNG || 
+     tile===TILE.OPENED_DOOR_SPLEEN || tile===TILE.OPENED_DOOR_LIVER || 
+     tile===TILE.OPENED_DOOR_KIDNEY){
+    moveToTile(nx, ny, "탐험 중");
+    return;
+  }
+
+  if(tile===TILE.BOSS){
+    if(!(organProgress.heart && organProgress.lung && organProgress.spleen && organProgress.liver && organProgress.kidney)){
+      setMessage("육부 성문은 아직 열리지 않습니다.\n먼저 오장 다섯 문을 모두 통과해야 합니다.");
+      return;
+    }
+    const q = pickQuestionByCategory(["육부","기항지부","관계","종합"]);
+    askQuiz(
+      q,
+      "육부 성문 👹",
+      ()=>{
+        organProgress.boss = true;
+        boardData[ny][nx] = TILE.OPENED_BOSS;
+        player.x = nx;
+        player.y = ny;
+        currentArea = "육부 성문";
+        score += 30;
+        setMessage("육부 성문을 돌파했습니다!\n이제 마지막 출구로 갈 수 있습니다.");
+        updateStatus();
+        drawBoard();
+      },
+      (ans)=>{
+        stayOnCurrentTile("육부 성문 앞");
+        setMessage("육부 성문 돌파 실패.\n정답은 " + ans + " 입니다.\n원래 자리에서 다시 도전하십시오.\n체력이 1 감소했습니다.");
+      }
+    );
+    return;
+  }
+
+  if(tile===TILE.OPENED_BOSS){
+    moveToTile(nx, ny, "탐험 중");
+    return;
+  }
+
+  if(tile===TILE.GOAL){
+    if(!organProgress.boss){
+      setMessage("최종 출구는 아직 봉인되어 있습니다.\n육부 성문을 먼저 통과하십시오.");
+      return;
+    }
+    
+    gameOver = true;
+    quizLock = true;
+    
+    moveToTile(nx, ny, "최종 출구");
+    score += 50;
+    updateStatus();
+    drawBoard();
+
+    alert(
+      "축하합니다!\n\n장부 RPG를 완료했습니다.\n\n최종 점수: " + score +
+      "\n총 정답 수: " + correctCount +
+      "\n총 출제 수: " + askedCount +
+      "\n남은 문제 수: " + questionBag.length
+    );
+    setMessage("최종 출구에 도달했습니다.\n오장육부의 비밀을 풀고 장상 질서를 회복했습니다.");
+    return;
+  }
+}
+
+function restartGame(){
+  boardData = JSON.parse(JSON.stringify(originalMap));
+  player = {x: 1, y: 1};
+  hp = 5;
+  score = 0;
+  correctCount = 0;
+  askedCount = 0;
+  currentArea = "시작 마당";
+  quizLock = false;
+  gameOver = false;
+  organProgress.heart = false;
+  organProgress.lung = false;
+  organProgress.spleen = false;
+  organProgress.liver = false;
+  organProgress.kidney = false;
+  organProgress.boss = false;
+  resetQuestionBag();
+  quizModalBg.style.display = "none";
+  setMessage("대전의 한의학 수련관에서 장부의 질서가 무너졌습니다.\n시작 마당에서 출발하여 오장의 문을 열고 육부 성문을 지나 최종 출구에 도달하십시오.");
+  updateStatus();
+  drawBoard();
+  
+  startBackgroundMusic(true);
+}
+
+// ========== 이벤트 리스너 ==========
+document.addEventListener("keydown", (e)=>{
+  if(gameOver) return;
+  if(e.key==="ArrowUp" || e.key==="w" || e.key==="W") tryEnterTile(player.x, player.y-1);
+  if(e.key==="ArrowDown" || e.key==="s" || e.key==="S") tryEnterTile(player.x, player.y+1);
+  if(e.key==="ArrowLeft" || e.key==="a" || e.key==="A") tryEnterTile(player.x-1, player.y);
+  if(e.key==="ArrowRight" || e.key==="d" || e.key==="D") tryEnterTile(player.x+1, player.y);
+});
+
+document.getElementById("btnUp").addEventListener("click", ()=>tryEnterTile(player.x, player.y-1));
+document.getElementById("btnDown").addEventListener("click", ()=>tryEnterTile(player.x, player.y+1));
+document.getElementById("btnLeft").addEventListener("click", ()=>tryEnterTile(player.x-1, player.y));
+document.getElementById("btnRight").addEventListener("click", ()=>tryEnterTile(player.x+1, player.y));
+
+restartBtn.addEventListener("click", restartGame);
+
+// ========== 게임 시작 ==========
+resetQuestionBag();
+restartGame();
+</script>
+</body>
+</html>
